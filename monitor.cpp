@@ -1,33 +1,50 @@
 #include "./monitor.h"
-#include <assert.h>
+#include <iostream>
 #include <thread>
 #include <chrono>
-#include <iostream>
-using std::cout, std::flush, std::this_thread::sleep_for, std::chrono::seconds;
+#include <map>
+#include <string>
+#include <functional>
 
-// Extracted function for blinking animation
+using namespace std;
+using namespace std::chrono;
+
 void blinkingAlert() {
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; ++i) {
     cout << "\r* " << flush;
-    sleep_for(seconds(1));
+    this_thread::sleep_for(seconds(1));
     cout << "\r *" << flush;
-    sleep_for(seconds(1));
+    this_thread::sleep_for(seconds(1));
   }
 }
 
-int vitalsOk(float temperature, float pulseRate, float spo2) {
-  if (temperature > 102 || temperature < 95) {
-    cout << "Temperature is critical!\n";
-    blinkingAlert();
-    return 0;
-  } else if (pulseRate < 60 || pulseRate > 100) {
-    cout << "Pulse Rate is out of range!\n";
-    blinkingAlert();
-    return 0;
-  } else if (spo2 < 90) {
-    cout << "Oxygen Saturation out of range!\n";
-    blinkingAlert();
-    return 0;
+// Pure logic to check a vital against limits
+VitalStatus evaluateVital(float value, const VitalLimits& limits) {
+  if (value < limits.lower) return VITAL_LOW;
+  if (value > limits.upper) return VITAL_HIGH;
+  return VITAL_OK;
+}
+
+// Handles a vital: checks it and alerts if out of range
+bool checkVital(const string& name, float value, const VitalLimits& limits) {
+  VitalStatus status = evaluateVital(value, limits);
+
+  if (status == VITAL_OK) return true;
+
+  if (status == VITAL_LOW) {
+    cout << name << " is too low!\n";
+  } else if (status == VITAL_HIGH) {
+    cout << name << " is too high!\n";
   }
-  return 1;
+  blinkingAlert();
+  return false;
+}
+
+// Public interface
+bool vitalsOk(float temperature, float pulseRate, float spo2) {
+  bool temperatureOk = checkVital("Temperature", temperature, {95.0, 102.0});
+  bool pulseRateOk = checkVital("Pulse Rate", pulseRate, {60.0, 100.0});
+  bool spo2Ok = checkVital("Oxygen Saturation", spo2, {90.0, 100.0});
+
+  return temperatureOk && pulseRateOk && spo2Ok;
 }
