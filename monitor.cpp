@@ -4,18 +4,15 @@
 #include <chrono>
 #include <string>
 
-using std::cout;
-using std::flush;
-using std::string;
-using std::this_thread::sleep_for;
-using std::chrono::seconds;
+using namespace std;
+using namespace std::chrono;
 
 void blinkingAlert() {
   for (int i = 0; i < 6; ++i) {
     cout << "\r* " << flush;
-    sleep_for(seconds(1));
+    this_thread::sleep_for(seconds(1));
     cout << "\r *" << flush;
-    sleep_for(seconds(1));
+    this_thread::sleep_for(seconds(1));
   }
 }
 
@@ -51,4 +48,8 @@ bool checkPulseRate(float pulseRate) {
 
 bool checkSpo2(float spo2) {
   return checkVital("Oxygen Saturation", spo2, {90.0f, 100.0f});
+}
+
+bool vitalsOk(float temperature, float pulseRate, float spo2) {
+  return checkTemperature(temperature) && checkPulseRate(pulseRate) && checkSpo2(spo2);
 }
