@@ -18,7 +18,6 @@ void blinkingAlert() {
 }
 
 // Evaluate a vital sign against limits (pure function)
-// Cyclomatic complexity: 3 (low, ok, high)
 VitalStatus evaluateVital(float value, const VitalLimits& limits) {
   if (value < limits.lower) return VITAL_LOW;
   if (value > limits.upper) return VITAL_HIGH;
@@ -26,7 +25,6 @@ VitalStatus evaluateVital(float value, const VitalLimits& limits) {
 }
 
 // Check a single vital and alert if out of range (I/O + logic)
-// Cyclomatic complexity: 2
 bool checkVital(const string& name, float value, const VitalLimits& limits) {
   VitalStatus status = evaluateVital(value, limits);
 
@@ -41,12 +39,20 @@ bool checkVital(const string& name, float value, const VitalLimits& limits) {
   return false;
 }
 
-// Public API to check all vitals, combining individual checks
-// Cyclomatic complexity: 1 (just calls and combines booleans)
-bool vitalsOk(float temperature, float pulseRate, float spo2) {
-  bool temperatureOk = checkVital("Temperature", temperature, {95.0f, 102.0f});
-  bool pulseRateOk = checkVital("Pulse Rate", pulseRate, {60.0f, 100.0f});
-  bool spo2Ok = checkVital("Oxygen Saturation", spo2, {90.0f, 100.0f});
+// Individual checks with minimal complexity
+bool checkTemperature(float temperature) {
+  return checkVital("Temperature", temperature, {95.0f, 102.0f});
+}
 
-  return temperatureOk && pulseRateOk && spo2Ok;
+bool checkPulseRate(float pulseRate) {
+  return checkVital("Pulse Rate", pulseRate, {60.0f, 100.0f});
+}
+
+bool checkSpo2(float spo2) {
+  return checkVital("Oxygen Saturation", spo2, {90.0f, 100.0f});
+}
+
+// Public API to check all vitals, combining individual checks
+bool vitalsOk(float temperature, float pulseRate, float spo2) {
+  return checkTemperature(temperature) && checkPulseRate(pulseRate) && checkSpo2(spo2);
 }
