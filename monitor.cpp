@@ -4,8 +4,11 @@
 #include <chrono>
 #include <string>
 
-using namespace std;
-using namespace std::chrono;
+using std::cout;
+using std::flush;
+using std::string;
+using std::this_thread::sleep_for;
+using std::chrono::seconds;
 
 void blinkingAlert() {
   for (int i = 0; i < 6; ++i) {
