@@ -9,16 +9,22 @@ using namespace std::chrono;
 
 void blinkingAlert() {
   for (int i = 0; i < 6; ++i) {
-    cout << "\r* " << flush;
+    cout << "\r*  " << flush;
     this_thread::sleep_for(seconds(1));
-    cout << "\r *" << flush;
+    cout << "\r * " << flush;
     this_thread::sleep_for(seconds(1));
   }
 }
 
 VitalStatus evaluateVital(float value, const VitalLimits& limits) {
+  float warningTolerance = 0.015f * limits.upper;
+
   if (value < limits.lower) return VITAL_LOW;
+  if (value >= limits.lower && value < limits.lower + warningTolerance) return VITAL_WARNING_LOW;
+
   if (value > limits.upper) return VITAL_HIGH;
+  if (value <= limits.upper && value > limits.upper - warningTolerance) return VITAL_WARNING_HIGH;
+
   return VITAL_OK;
 }
 
@@ -28,14 +34,22 @@ bool checkVital(const string& name, float value, const VitalLimits& limits) {
   if (status == VITAL_OK) return true;
 
   const char* messages[] = {
-    "",                 // VITAL_OK
-    " is too low!\n",   // VITAL_LOW
-    " is too high!\n"   // VITAL_HIGH
+    "",                          // VITAL_OK
+    " is too low!\n",            // VITAL_LOW
+    " is too high!\n",           // VITAL_HIGH
+    " Warning: Approaching low!\n",  // VITAL_WARNING_LOW
+    " Warning: Approaching high!\n"  // VITAL_WARNING_HIGH
   };
 
   cout << name << messages[status];
-  blinkingAlert();
-  return false;
+
+  if (status == VITAL_LOW || status == VITAL_HIGH) {
+    blinkingAlert();
+    return false;
+  }
+
+  // For warnings, notify but do not fail
+  return true;
 }
 
 bool checkTemperature(float temperature) {
