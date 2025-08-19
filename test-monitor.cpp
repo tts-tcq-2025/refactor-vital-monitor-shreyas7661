@@ -26,6 +26,49 @@ TEST(Monitor, Spo2TooLow) {
   ASSERT_FALSE(vitalsOk(98.6, 70, 89));
 }
 
+// ---------- Warning tests ----------
+TEST(Monitor, TemperatureWarningLow) {
+  float upper = 102.0f;
+  float warningTolerance = 0.015f * upper; // 1.53
+  float warningValue = 95.0f + warningTolerance / 2; // Mid warning range low
+  ASSERT_TRUE(checkVital("Temperature", warningValue, {95.0f, upper}));
+}
+
+TEST(Monitor, TemperatureWarningHigh) {
+  float upper = 102.0f;
+  float warningTolerance = 0.015f * upper; // 1.53
+  float warningValue = upper - warningTolerance / 2; // Mid warning range high
+  ASSERT_TRUE(checkVital("Temperature", warningValue, {95.0f, upper}));
+}
+
+TEST(Monitor, PulseRateWarningLow) {
+  float upper = 100.0f;
+  float warningTolerance = 0.015f * upper; // 1.5
+  float warningValue = 60.0f + warningTolerance / 2; // Mid warning range low
+  ASSERT_TRUE(checkVital("Pulse Rate", warningValue, {60.0f, upper}));
+}
+
+TEST(Monitor, PulseRateWarningHigh) {
+  float upper = 100.0f;
+  float warningTolerance = 0.015f * upper; // 1.5
+  float warningValue = upper - warningTolerance / 2; // Mid warning range high
+  ASSERT_TRUE(checkVital("Pulse Rate", warningValue, {60.0f, upper}));
+}
+
+TEST(Monitor, Spo2WarningLow) {
+  float upper = 100.0f;
+  float warningTolerance = 0.015f * upper; // 1.5
+  float warningValue = 90.0f + warningTolerance / 2; // Mid warning range low
+  ASSERT_TRUE(checkVital("Oxygen Saturation", warningValue, {90.0f, upper}));
+}
+
+TEST(Monitor, Spo2WarningHigh) {
+  float upper = 100.0f;
+  float warningTolerance = 0.015f * upper; // 1.5
+  float warningValue = upper - warningTolerance / 2; // Mid warning range high
+  ASSERT_TRUE(checkVital("Oxygen Saturation", warningValue, {90.0f, upper}));
+}
+
 // ---------- Pure function tests ----------
 TEST(Evaluator, VitalInRange) {
   VitalLimits limits = {60, 100};
